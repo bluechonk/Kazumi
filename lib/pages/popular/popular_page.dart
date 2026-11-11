@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:kazumi/services/logging/logger.dart';
 import 'package:kazumi/services/platform/desktop_window_config.dart';
 import 'package:kazumi/bean/appbar/drag_to_move_bar.dart' as dtb;
+import 'package:kazumi/bean/appbar/window_drag_area.dart';
 import 'package:kazumi/utils/device.dart';
 
 class PopularPage extends StatefulWidget {
@@ -186,12 +187,14 @@ class _PopularPageState extends State<PopularPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       left: 16, top: 8, bottom: 8, right: 60),
-                  child: SizedBox(
+                    child: SizedBox(
                     height: 44,
                     child: Observer(
                       builder: (_) {
                         final bool isTrend = popularController.currentTag == '';
-                        return KazumiMenuButton(
+                        // 标题即下拉菜单按钮，位于拖拽区内，挖洞保住点击
+                        return WindowDragHole(
+                          child: KazumiMenuButton(
                           animated: true,
                           style: const MenuStyle(
                             maximumSize: WidgetStatePropertyAll(Size(240, 350)),
@@ -223,6 +226,7 @@ class _PopularPageState extends State<PopularPage> {
                               ],
                             ),
                           ),
+                        ),
                         );
                       },
                     ),
@@ -237,23 +241,30 @@ class _PopularPageState extends State<PopularPage> {
   }
 
   List<Widget> buildActions() {
+    // actions 叠在 flexibleSpace 的拖拽区之上，逐个挖洞保住点击
     return <Widget>[
       if (MediaQuery.of(context).orientation == Orientation.portrait)
-        IconButton(
-          tooltip: '搜索',
-          onPressed: () => context.pushNamed('/search/'),
-          icon: const Icon(Icons.search),
+        WindowDragHole(
+          child: IconButton(
+            tooltip: '搜索',
+            onPressed: () => context.pushNamed('/search/'),
+            icon: const Icon(Icons.search),
+          ),
         ),
-      IconButton(
-        tooltip: '历史记录',
-        onPressed: () => context.pushNamed('/settings/history/'),
-        icon: const Icon(Icons.history),
+      WindowDragHole(
+        child: IconButton(
+          tooltip: '历史记录',
+          onPressed: () => context.pushNamed('/settings/history/'),
+          icon: const Icon(Icons.history),
+        ),
       ),
       if (isDesktop() && !DesktopWindowConfig.showWindowButton)
-        IconButton(
-          tooltip: '退出',
-          onPressed: () => windowManager.close(),
-          icon: const Icon(Icons.close),
+        WindowDragHole(
+          child: IconButton(
+            tooltip: '退出',
+            onPressed: () => windowManager.close(),
+            icon: const Icon(Icons.close),
+          ),
         ),
     ];
   }

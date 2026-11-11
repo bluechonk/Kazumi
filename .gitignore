@@ -55,3 +55,6 @@ android/build/reports/problems/
 **/macos/Pods/
 **/ios/Podfile.lock
 **/macos/Podfile.lock
+
+# 本地过程文件，严禁入库
+.tmp/

@@ -37,6 +37,9 @@ class FlutterWindow : public Win32Window {
 
   // Register Shortcut MethodChannel
   void RegisterShortcutChannel();
+
+  // 拖拽区通道：接收 Dart 侧上报的标题栏矩形，供 WM_NCHITTEST 使用
+  void RegisterDragChannel();
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_
