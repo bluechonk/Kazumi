@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:kazumi/bean/appbar/sys_app_bar.dart';
+import 'package:kazumi/bean/appbar/window_drag_area.dart';
 import 'package:kazumi/bean/card/bangumi_timeline_card.dart';
 import 'package:kazumi/bean/dialog/adaptive_bottom_sheet.dart';
 import 'package:kazumi/bean/dialog/material_bottom_sheet.dart';
@@ -179,7 +180,10 @@ class _TimelinePageState extends State<TimelinePage> {
             needTopOffset: false,
             toolbarHeight: 72,
             title: narrowPortrait
-                ? _buildSeasonPicker(context, loading: loading, inAppBar: true)
+                // 窄屏 title 是交互选择器，须从原生拖拽判定中挖洞，否则点击被吞
+                ? WindowDragHole(
+                    child: _buildSeasonPicker(
+                        context, loading: loading, inAppBar: true))
                 : Text(
                     '时间表',
                     style: theme.textTheme.headlineSmall
