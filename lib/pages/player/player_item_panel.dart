@@ -21,6 +21,8 @@ import 'package:kazumi/pages/player/player_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:kazumi/services/player/remote.dart';
 import 'package:kazumi/bean/appbar/drag_to_move_bar.dart' as dtb;
+import 'package:kazumi/bean/widget/window_controls.dart';
+import 'package:kazumi/services/platform/desktop_window_config.dart';
 import 'package:kazumi/pages/settings/danmaku/danmaku_settings_sheet.dart';
 import 'package:kazumi/utils/constants.dart';
 import 'package:kazumi/utils/device.dart';
@@ -828,6 +830,7 @@ class _PlayerItemPanelState extends State<PlayerItemPanel> {
               ),
               Expanded(
                 child: dtb.DragToMoveArea(
+                  enabled: !videoPageController.isFullscreen,
                   child: compact
                       ? const SizedBox(height: 40)
                       : Text(
@@ -985,6 +988,11 @@ class _PlayerItemPanelState extends State<PlayerItemPanel> {
                   if (!compact) _syncPlayMenuItem,
                 ],
               ),
+              // 隐藏原生标题栏时面板头就是窗口右上角，窗口按钮须挂在这里
+              if (isDesktop() &&
+                  !DesktopWindowConfig.showWindowButton &&
+                  (compact || !videoPageController.isFullscreen))
+                const WindowControls(),
             ],
           ),
         ),

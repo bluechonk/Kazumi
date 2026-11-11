@@ -10,6 +10,8 @@ import 'package:window_manager/window_manager.dart';
 import 'package:kazumi/bean/appbar/drag_to_move_bar.dart' as dtb;
 import 'package:kazumi/bean/dialog/adaptive_bottom_sheet.dart';
 import 'package:kazumi/bean/widget/embedded_native_control_area.dart';
+import 'package:kazumi/bean/widget/window_controls.dart';
+import 'package:kazumi/services/platform/desktop_window_config.dart';
 import 'package:kazumi/bean/widget/loading_indicator.dart';
 import 'package:kazumi/bean/widget/media_error_widget.dart';
 import 'package:kazumi/modules/download/download_module.dart';
@@ -430,9 +432,10 @@ class _VideoPageState extends State<VideoPage>
                                 color: Colors.white),
                             onPressed: _onBackPressed,
                           ),
-                          const Expanded(
+                          Expanded(
                               child: dtb.DragToMoveArea(
-                                  child: SizedBox(height: 40))),
+                                  enabled: !videoPageController.isFullscreen,
+                                  child: const SizedBox(height: 40))),
                           IconButton(
                             icon: const Icon(Icons.refresh_outlined,
                                 color: Colors.white),
@@ -459,6 +462,11 @@ class _VideoPageState extends State<VideoPage>
                                 color: Colors.white),
                             onPressed: _toggleDebugConsole,
                           ),
+                          // 隐藏原生标题栏时播放器顶栏必须有窗口按钮；全屏不显示
+                          if (isDesktop() &&
+                              !DesktopWindowConfig.showWindowButton &&
+                              !videoPageController.isFullscreen)
+                            const WindowControls(),
                         ],
                       ),
                     ),

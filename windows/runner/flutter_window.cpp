@@ -2,6 +2,7 @@
 #include "fullscreen_utils.h"
 #include "external_player_utils.h"
 #include "shortcut_utils.h"
+#include "drag_region_utils.h"
 
 #include <optional>
 #include <flutter/method_channel.h>
@@ -79,10 +80,14 @@ bool FlutterWindow::OnCreate() {
   // Register Shortcut MethodChannel
   RegisterShortcutChannel();
 
+  // Register Drag Region MethodChannel
+  RegisterDragChannel();
+
   return true;
 }
 
 void FlutterWindow::OnDestroy() {
+  DragRegionUtils::Clear();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }
@@ -108,6 +113,15 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+    case WM_NCHITTEST: {
+      // window_manager 插件在可缩放时不消费该消息，此处补原生拖拽判定；
+      // 返回 0 表示不表态，继续走 DefWindowProc 的边框 resize
+      LRESULT hit = DragRegionUtils::HitTest(hwnd, lparam);
+      if (hit != 0) {
+        return hit;
+      }
+      break;
+    }
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
@@ -198,6 +212,22 @@ void FlutterWindow::RegisterShortcutChannel() {
       result->Success(flutter::EncodableValue(true));
     } else {
       result->Error("Failed", "Failed to create desktop shortcut");
+    }
+  });
+}
+
+// Drag Region MethodChannel setup
+void FlutterWindow::RegisterDragChannel() {
+  auto channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "com.predidit.kazumi/drag",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel->SetMethodCallHandler([](const auto& call, auto result) {
+    if (DragRegionUtils::HandleMethodCall(call.method_name(),
+                                          call.arguments())) {
+      result->Success();
+    } else {
+      result->NotImplemented();
     }
   });
 }
